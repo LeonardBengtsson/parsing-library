@@ -308,12 +308,13 @@ where
 
 pub type Span<T> = WithSpan<Ignore<T>>;
 
+#[derive(Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct WithIndex<T>
 where
     T: for<'b> Parsable<'b>
 {
-    node: T,
-    index: usize,
+    pub node: T,
+    pub index: usize,
 }
 
 impl<'a, T> Parsable<'a> for WithIndex<T>
