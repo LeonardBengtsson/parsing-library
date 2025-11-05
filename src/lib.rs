@@ -1,5 +1,7 @@
 //! # Examples
 //! ```rust
+//! use parsable::*;
+//!
 //! struct TestStruct {
 //!     a: CharLiteral<b'a'>,
 //!     b: CharLiteral<b'b'>,
@@ -54,10 +56,15 @@
 //! }
 //! ```
 
+pub mod stream;
+pub mod parsable_types;
+
+pub use crate::stream::*;
+pub use crate::parsable_types::*;
+pub use parsable_derive::Parsable;
+
 use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
-
-use crate::stream::ScopedStream;
 
 // a value of `None` symbolizes no match
 // a value of `Some(Err(_))` symbolizes a partial match with an error that should be propagated
@@ -147,9 +154,11 @@ pub fn format_error_stack(buffer: &[u8], stack: ParseErrorStack) -> String {
             current_line = line;
             current_line_offset = *line_offset;
         }
+        let column = source_position - current_line_offset;
 
         out.push_str(&format!("\nat {:>line_text_width$}:{:>column_text_width$}: Expected {}", 
-            current_line, source_position - current_line_offset, error));
+            current_line + 1, column + 1, error));
     }
     out
 }
+

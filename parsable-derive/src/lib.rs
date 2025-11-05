@@ -27,11 +27,11 @@ pub fn parsable_derive(input: TokenStream) -> TokenStream {
 fn call_parse(tokens: TokenStream2, first_member: &mut bool) -> TokenStream2 {
     let inner = if *first_member {
         *first_member = false;
-        quote! { <#tokens as leben_parsable::Parsable>::parse(stream)? }
+        quote! { <#tokens as parsable::Parsable>::parse(stream)? }
     } else {
-        quote! { <#tokens as leben_parsable::Parsable>::parse_or_error(stream) }
+        quote! { <#tokens as parsable::Parsable>::parse_or_error(stream) }
     };
-    quote! { leben_parsable::ok_or_throw!( #inner ) }
+    quote! { parsable::ok_or_throw!( #inner ) }
 }
 
 fn member_derive(ty: &syn::Type, first_member: &mut bool) -> TokenStream2 {
@@ -79,22 +79,22 @@ fn member_derive(ty: &syn::Type, first_member: &mut bool) -> TokenStream2 {
 fn impl_block(type_ident: &syn::Ident, inner_parse: TokenStream2) -> TokenStream2 {
     let type_name = &type_ident.to_string();
     quote! {
-        impl<'__leben_parsable_derive> leben_parsable::Parsable<'__leben_parsable_derive> for #type_ident {
-            fn parse(stream: &mut leben_parsable::ScopedStream<'__leben_parsable_derive>) -> leben_parsable::ParseOutcome<Self> {
+        impl<'__parsable_derive> parsable::Parsable<'__parsable_derive> for #type_ident {
+            fn parse(stream: &mut parsable::ScopedStream<'__parsable_derive>) -> parsable::ParseOutcome<Self> {
                 #![allow(unexpected_cfgs)]
-                #[cfg(leben_parsable_derive_debug)] {
+                #[cfg(parsable_derive_debug)] {
                     println!("DEBUG >>>>>>>>>>> {}", #type_name);
                 }
                 let res = stream.scope(|stream| {
                     #inner_parse
                 });
-                #[cfg(leben_parsable_derive_debug)] {
+                #[cfg(parsable_derive_debug)] {
                     println!("DEBUG <<<<<<<<<<< {}\n{:?}", #type_name, &res);
                 }
                 res
             }
 
-            fn error() -> leben_parsable::ParseError {
+            fn error() -> parsable::ParseError {
                 String::from(#type_name)
             }
         }
@@ -115,11 +115,11 @@ fn field_derive(field: &syn::Field, first_member: &mut bool) -> TokenStream2 {
         if is_unit_type {
             let literal_parse = if *first_member {
                 *first_member = false;
-                quote! { leben_parsable::parse_literal(stream, #literal)? }
+                quote! { parsable::parse_literal(stream, #literal)? }
             } else {
-                quote! { leben_parsable::parse_literal_or_error(stream, #literal) }
+                quote! { parsable::parse_literal_or_error(stream, #literal) }
             };
-            quote! { #prefix leben_parsable::ok_or_throw!( #literal_parse ) }
+            quote! { #prefix parsable::ok_or_throw!( #literal_parse ) }
         } else {
             quote! { #prefix compile_error!("Unexpected `literal` attribute") }
         }

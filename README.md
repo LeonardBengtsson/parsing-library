@@ -1,15 +1,11 @@
-# leben-compiler
-
-## Grammar
-
-The language's grammar in BNF format can be found in `./grammar.txt`
+# parsable
 
 ## Usage
 
-### Parsing
+Use the `parsable_debug` flag to print debug messages when parsing using the types provided in this crate.
 
-To parse a source file and output its abstract syntax tree to a file in RON format, run:
+Additionally, the `parsable_derive_debug` config flag can be used to add debug messages to derived `Parsable` implementations.
 
-`EXE <input> <output>`
+Example debugging commands (powershell):
 
-Example: `cargo run -- examples/test.txt examples/out.ron`
+`clear; $env:RUSTFLAGS='--cfg parsable_derive_debug'; cargo run --features parsable/parsable_debug -- examples/expr1.txt examples/out.ron; $env:RUSTFLAGS=''`

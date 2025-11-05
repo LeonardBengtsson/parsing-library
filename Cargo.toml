@@ -1,9 +1,11 @@
 [package]
-name = "leben-compiler"
+name = "parsable"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-leben-parsable = { path = "leben-parsable" }
-ron = "0.11.0"
-serde = { version = "1.0.228", features = ["derive"] }
+parsable-derive = { path = "parsable-derive" }
+serde = { version = "1.0.228", features = ["derive"]}
+
+[features]
+parsable_debug = []

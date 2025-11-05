@@ -1,4 +1,4 @@
-use crate::{ParseErrorContext, ParseOutcome, parsable::Parsable};
+use crate::{ParseErrorContext, ParseOutcome, Parsable};
 
 pub struct ScopedStream<'a> {
     buffer: &'a [u8],
@@ -55,7 +55,7 @@ impl<'a> ScopedStream<'a> {
         }
 
         outcome.map(|result| {
-            #[cfg(feature = "leben_parsable_debug")] {
+            #[cfg(feature = "parsable_debug")] {
                 if matches!(result, Ok(..)) {
                     println!("DEBUG BUFFER:\n{}$EOS", String::from_utf8_lossy(&self.buffer[self.index..]));
                 }

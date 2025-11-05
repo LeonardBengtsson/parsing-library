@@ -34,7 +34,7 @@ where
             .scope_with_span(|stream| T::parse(stream))
             .map(|result| result.map(
                 |(node, span)| WithSpan { node, span: span.to_owned() }));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG SPAN        {:?}",
                 res.as_ref().map(|span| String::from_utf8_lossy(&span.span)));
         }
@@ -63,7 +63,7 @@ where
     T: for<'b> Parsable<'b> + Debug
 {
     fn parse(stream: &mut ScopedStream<'a>) -> ParseOutcome<Self> {
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG REPEAT >>>> {} * {}", std::any::type_name::<T>(), MIN);
         }
         let mut nodes = Vec::new();
@@ -73,7 +73,7 @@ where
             nodes.push(ok_or_throw!(node));
         }
         let res = (nodes.len() >= MIN).then_some(Ok(Repeat { nodes }));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG REPEAT <<<< {} * {}\n{:?}", std::any::type_name::<T>(), MIN, &res);
         }
         res
@@ -101,7 +101,7 @@ where
     T: for<'b> Parsable<'b> + Debug
 {
     fn parse(stream: &mut ScopedStream<'a>) -> ParseOutcome<Self> {
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG REPEATLIM > {} * ({}-{})", std::any::type_name::<T>(), MIN, MAX);
         }
         let mut nodes = Vec::with_capacity(MAX);
@@ -113,14 +113,14 @@ where
                 nodes.push(ok_or_throw!(node));
             } else {
                 let res = (i >= MIN).then_some(Ok(RepeatLimited { nodes }));
-                #[cfg(feature = "leben_parsable_debug")] {
+                #[cfg(feature = "parsable_debug")] {
                     println!("DEBUG REPEATLIM < {} * ({}-{})\n{:?}", std::any::type_name::<T>(), MIN, MAX, &res);
                 }
                 return res;
             }
         }
         let res = Some(Ok(RepeatLimited { nodes }));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG REPEATLIM < {} * ({}-{})\n{:?}", std::any::type_name::<T>(), MIN, MAX, &res);
         }
         res
@@ -169,7 +169,7 @@ pub struct EndOfStream;
 impl<'a> Parsable<'a> for EndOfStream {
     fn parse(stream: &mut ScopedStream<'a>) -> ParseOutcome<Self> {
         let res = stream.at_end().then_some(Ok(EndOfStream));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG END         {:?}", &res);
         }
         res
@@ -197,7 +197,7 @@ where
             .scope(|stream| T::parse(stream))
             .map(|result| result.map(
                 |node| WithEnd { node }));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG WITH END  < {}\n{:?}", std::any::type_name::<T>(), &res);
         }
         let res = ok_or_throw!(res?);
@@ -231,7 +231,7 @@ where
     S: for<'s> Parsable<'s>,
 {
     fn parse(stream: &mut ScopedStream<'a>) -> ParseOutcome<Self> {
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG INTER >>>>> {}", std::any::type_name::<T>());
         }
         let mut nodes = Vec::new();
@@ -247,7 +247,7 @@ where
             nodes.push(ok_or_throw!(node));
         }
         let res = Some(Ok(Intersperse { nodes, phantom_data: PhantomData }));
-        #[cfg(feature = "leben_parsable_debug")] {
+        #[cfg(feature = "parsable_debug")] {
             println!("DEBUG INTER <<<<< {}\n{:?}", std::any::type_name::<T>(), &res);
         }
         res
@@ -393,7 +393,7 @@ pub fn parse_literal<'a>(stream: &mut ScopedStream<'a>, literal: &'static [u8]) 
         stream.read(literal.len(), |slice| slice == literal)
             .map(|_| Ok(()))
     });
-    #[cfg(feature = "leben_parsable_debug")] {
+    #[cfg(feature = "parsable_debug")] {
         let lit = String::from_utf8_lossy(literal);
         println!("DEBUG LITERAL     {} {:?}", &lit, res.as_ref().map(|_| &lit));
     }
@@ -409,10 +409,10 @@ pub fn parse_literal_or_error<'a>(stream: &mut ScopedStream<'a>, literal: &'stat
 macro_rules! literals {
     { $( $vis:vis struct $name:ident = $lit:literal; )* } => {
         $(
-            #[derive(Parsable, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
-            $vis struct $name {
-                #[literal = $lit] _0: (),
-            }
+            #[derive(parsable::Parsable, Clone, Default, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
+            $vis struct $name (
+                #[literal = $lit] (),
+            );
 
             impl std::fmt::Debug for $name {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
