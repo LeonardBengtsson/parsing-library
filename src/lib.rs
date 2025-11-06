@@ -156,8 +156,11 @@ pub fn format_error_stack(buffer: &[u8], stack: ParseErrorStack) -> String {
         }
         let column = source_position - current_line_offset;
 
-        out.push_str(&format!("\nat {:>line_text_width$}:{:>column_text_width$}: Expected {}", 
-            current_line + 1, column + 1, error));
+        out.push_str(&format!(
+            "\nat {:>line_text_width$}:{:>column_text_width$}: Expected {}, found \"{}\"...",
+            current_line + 1, column + 1, error,
+            String::from_utf8_lossy(&buffer[*source_position..(source_position + 16).min(buffer.len())])
+        ));
     }
     out
 }
