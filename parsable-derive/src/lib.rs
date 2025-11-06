@@ -125,7 +125,7 @@ fn field_derive(field: &syn::Field, first_member: &mut bool) -> TokenStream2 {
         }
     } else {
         if is_unit_type {
-            quote! { #prefix compile_error!("Expected `literal` attribute")  }
+            quote! { #prefix compile_error!("Expected `literal` attribute") }
         } else {
             let member = member_derive(ty, first_member);
             quote! { #prefix #member }
@@ -195,9 +195,16 @@ fn enum_derive(enum_name: syn::Ident, data_enum: syn::DataEnum) -> TokenStream2 
                     )
                 }
             },
-            syn::Fields::Unit => quote! { 
-                compile_error!("`Parsable` cannot be derived for unit enum variants") 
-            }.into(),
+            syn::Fields::Unit => {
+                if let Some(literal) = get_literal_attribute(&variant.attrs) {
+                    quote! { {
+                        let _ = parsable::ok_or_throw!( parsable::parse_literal(stream, #literal)? );
+                        Self::#variant_name
+                    } }
+                } else {
+                    quote! { compile_error!("Expected `literal` attribute") }
+                }
+            },
         }
     });
 
