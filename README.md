@@ -1,9 +1,11 @@
 # parsable
 
+An easy-to-use declarative parsing library written in Rust. Easy-to-use in that usage optimally consists only of derived trait implementations, and declarative in that the parsing behavior is declared and implied by the type system. This means that the format declaration also defines the output type.
+
 ## Usage
 
-This crate exposes the `Parsable` trait. Implement it for a type, and create an
-instance of the type by parsing it from an input slice like so:
+This crate exposes the `Parsable` trait. Simply derive it using
+`#[derive(Parsable)]`, or implement it manually like so:
 
 ```rust
 use parsable::*;
