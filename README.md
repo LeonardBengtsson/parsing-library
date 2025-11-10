@@ -2,6 +2,42 @@
 
 ## Usage
 
+This crate exposes the `Parsable` trait. Implement it for a type, and create an
+instance of the type by parsing it from an input slice like so:
+
+```rust
+use parsable::*;
+
+struct TestStruct {
+    a: CharLiteral<b'a'>,
+    b: CharLiteral<b'b'>,
+}
+
+impl<'a> Parsable<'a> for TestStruct {
+    fn parse(stream: &mut ScopedStream<'a>) -> ParseOutcome<Self>
+    where
+        Self: Sized
+    {
+        stream.scope(|stream| {
+            Some(Ok(TestStruct {
+                a: ok_or_throw!(CharLiteral::<b'a'>::parse(stream)?),
+                b: ok_or_throw!(CharLiteral::<b'b'>::parse_or_error(stream)),
+            }))
+        })
+    }
+
+    fn error() -> ParseError {
+        String::from("TestStruct")
+    }
+}
+
+fn main(source: &[u8]) {
+    let mut stream = ScopedStream::new(source);
+    let outcome = WithEnd::<TestStruct>::parse(&mut stream);
+    // ...
+}
+```
+
 Use the `parsable_debug` flag to print debug messages when parsing using the types provided in this crate.
 
 Additionally, the `parsable_derive_debug` config flag can be used to add debug messages to derived `Parsable` implementations.
