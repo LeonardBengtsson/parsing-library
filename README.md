@@ -5,7 +5,25 @@ An easy-to-use declarative parsing library written in Rust. Easy-to-use in that 
 ## Usage
 
 This crate exposes the `Parsable` trait. Simply derive it using
-`#[derive(Parsable)]`, or implement it manually like so:
+`#[derive(Parsable)]` like this...
+
+```rust
+use parsable::*;
+
+#[derive(Parsable)]
+struct TestStruct {
+    a: CharLiteral<b'a'>,
+    b: CharLiteral<b'b'>,
+}
+
+fn main(source: &[u8]) {
+    let mut stream = ScopedStream::new(source);
+    let outcome = WithEnd::<TestStruct>::parse(&mut stream);
+    // ...
+}
+```
+
+...or implement it manually like this:
 
 ```rust
 use parsable::*;
