@@ -238,13 +238,13 @@ where
         while let Some(node) = stream
             .scope(|stream| T::parse(stream))
         {
+            nodes.push(ok_or_throw!(node));
             let sep = stream.scope(|stream| S::parse(stream));
             if let Some(sep_result) = sep {
                 ok_or_throw!(sep_result);
             } else {
                 break;
             }
-            nodes.push(ok_or_throw!(node));
         }
         let res = Some(Ok(Intersperse { nodes, phantom_data: PhantomData }));
         #[cfg(feature = "parsable_debug")] {
